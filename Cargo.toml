@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rocket = { git = "https://github.com/SergioBenitez/Rocket", features = ["json"] }
+serde = "1.0.136"
