@@ -1,8 +1,8 @@
 mod model;
 pub mod controller;
 mod service;
-mod credential;
+mod credential_repo;
 
 use model::*;
 use service::*;
-use credential::*;
+use credential_repo::*;

@@ -21,3 +21,10 @@ fn config_provider() -> Figment {
         .merge(Env::prefixed("APP_").global())
         .select(Profile::from_env_or("APP_PROFILE", "default"))
 }
+
+pub fn extract_config(profile: &str) -> AppConfig {
+    config_provider()
+        .select(Profile::new(profile))
+        .extract()
+        .unwrap()
+}

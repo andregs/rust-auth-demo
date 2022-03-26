@@ -27,6 +27,6 @@ impl <CR> AuthServiceApi for AuthService<CR>
     where CR: CredentialRepoApi + Sync + Send {
 
     async fn register(self: &Self, credentials: Credentials) -> bool {
-        self.credential_repo.insert_credentials(credentials).await
+        self.credential_repo.insert_credentials(&credentials).await
     }
 }
