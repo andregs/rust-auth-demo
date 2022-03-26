@@ -1,12 +1,16 @@
+use rocket::fairing::AdHoc;
 use rocket::figment::providers::{Env, Format, Toml};
 use rocket::figment::{Figment, Profile};
 use rocket::{Build, Rocket};
 
+use super::*;
 use crate::auth;
 
-pub fn build_rocket() -> Rocket<Build> {
+pub async fn build_rocket() -> Rocket<Build> {
     let provider = config_provider();
     rocket::custom(provider)
+        .attach(AdHoc::config::<AppConfig>())
+        .attach(db::stage().await)
         .attach(auth::controller::stage())
 }
 

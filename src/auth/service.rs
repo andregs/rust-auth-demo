@@ -1,7 +1,11 @@
+use async_trait::async_trait;
+use sqlx::{Pool, Postgres};
+
 use super::*;
 
+#[async_trait]
 pub trait AuthServiceApi {
-    fn register(&self, credentials: Credentials) -> bool;
+    async fn register(&self, credentials: Credentials) -> bool;
 }
 
 pub struct AuthService<CR = PostgresCredentialRepo>
@@ -10,18 +14,19 @@ pub struct AuthService<CR = PostgresCredentialRepo>
     pub credential_repo: CR,
 }
 
-impl<CR> AuthService<CR>
-    where CR: CredentialRepoApi
-{
-    pub fn new(credential_repo: CR) -> Self {
-        Self { credential_repo }
+impl AuthService {
+    pub fn new(db: &Pool<Postgres>) -> Self {
+        Self {
+            credential_repo: PostgresCredentialRepo::new(db),
+        }
     }
 }
 
+#[async_trait]
 impl <CR> AuthServiceApi for AuthService<CR>
     where CR: CredentialRepoApi + Sync + Send {
 
-    fn register(self: &Self, credentials: Credentials) -> bool {
-        self.credential_repo.save_credentials(credentials)
+    async fn register(self: &Self, credentials: Credentials) -> bool {
+        self.credential_repo.insert_credentials(credentials).await
     }
 }

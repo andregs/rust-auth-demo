@@ -1,0 +1,5 @@
+[default.db]
+url = "postgres://postgres:mysecretpassword@localhost/auth_demo"
+
+[test.db]
+url = "postgres://postgres:mysecretpassword@localhost/auth_demo_tests"

@@ -1,6 +1,7 @@
 use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;
-use rocket::{post, routes};
+use rocket::{post, routes, State};
+use sqlx::{Pool, Postgres};
 
 use super::*;
 use super::service::AuthService;
@@ -12,10 +13,9 @@ pub fn stage() -> AdHoc {
 }
 
 #[post("/register", format = "json", data = "<body>")]
-async fn register(body: Json<Credentials>) -> String {
-    let credential_repo = PostgresCredentialRepo{};
-    let service = AuthService::new(credential_repo);
-    let result: bool = service.register(body.0);
+async fn register(db: &State<Pool<Postgres>>, body: Json<Credentials>) -> String {
+    let service = AuthService::new(db);
+    let result: bool = service.register(body.0).await;
     String::from(format!("Registered. {}", result))
 }
 

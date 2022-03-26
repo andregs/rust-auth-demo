@@ -6,8 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-trait = "0.1.52"
 rocket = { git = "https://github.com/SergioBenitez/Rocket", features = ["json"] }
 serde = "1.0.136"
+
+[dependencies.sqlx]
+version = "0.5.11"
+features = ["macros", "runtime-tokio-rustls", "postgres"]
 
 [dev-dependencies]
 mockall = "0.11.0"
