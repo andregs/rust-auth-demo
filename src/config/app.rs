@@ -4,7 +4,7 @@ use rocket::{Build, Rocket};
 
 use crate::auth;
 
-pub async fn build_rocket() -> Rocket<Build> {
+pub fn build_rocket() -> Rocket<Build> {
     let provider = config_provider();
     rocket::custom(provider)
         .attach(auth::controller::stage())
