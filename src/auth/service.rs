@@ -11,13 +11,15 @@ pub trait AuthServiceApi {
 pub struct AuthService<CR = PostgresCredentialRepo>
     where CR: CredentialRepoApi,
 {
+    db: Pool<Postgres>,
     pub credential_repo: CR,
 }
 
 impl AuthService {
     pub fn new(db: &Pool<Postgres>) -> Self {
         Self {
-            credential_repo: PostgresCredentialRepo::new(db),
+            db: db.clone(),
+            credential_repo: PostgresCredentialRepo,
         }
     }
 }
@@ -27,6 +29,9 @@ impl <CR> AuthServiceApi for AuthService<CR>
     where CR: CredentialRepoApi + Sync + Send {
 
     async fn register(self: &Self, credentials: Credentials) -> bool {
-        self.credential_repo.insert_credentials(&credentials).await
+        let mut tx = self.db.begin().await.unwrap();
+        let result = self.credential_repo.insert_credentials_tx(&mut tx, &credentials).await;
+        tx.commit().await.unwrap();
+        result
     }
 }
