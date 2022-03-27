@@ -10,8 +10,8 @@ mod insert_credentials {
     async fn it_should_insert_good_credentials() {
         let (mut tx, repo) = before_each().await;
         let credentials = &new_random_credentials();
-        let is_inserted = repo.insert_credentials(&mut tx, credentials).await;
-        assert!(is_inserted);
+        let rows_affected = repo.insert_credentials(&mut tx, credentials).await;
+        assert_eq!(rows_affected, 1);
     }
 }
 
@@ -25,7 +25,7 @@ mod check_credentials {
         repo.insert_credentials(&mut tx, credentials).await;
         
         let is_valid = repo.check_credentials_tx(&mut tx, credentials).await;
-        assert!(is_valid);
+        assert!(is_valid.unwrap());
     }
 
     #[async_std::test]
@@ -34,7 +34,7 @@ mod check_credentials {
         let credentials = new_random_credentials();
         
         let is_valid = repo.check_credentials_tx(&mut tx, &credentials).await;
-        assert!(is_valid == false);
+        assert!(is_valid.is_none());
     }
 
     #[async_std::test]
@@ -45,7 +45,7 @@ mod check_credentials {
         credentials.password = String::from("wrong password");
         
         let is_valid = repo.check_credentials_tx(&mut tx, &credentials).await;
-        assert!(is_valid == false);
+        assert!(is_valid.unwrap() == false);
     }
 }
 

@@ -28,10 +28,15 @@ impl AuthService {
 impl <CR> AuthServiceApi for AuthService<CR>
     where CR: CredentialRepoApi + Sync + Send {
 
-    async fn register(self: &Self, credentials: Credentials) -> bool {
+    async fn register(&self, credentials: Credentials) -> bool {
         let mut tx = self.db.begin().await.unwrap();
-        let result = self.credential_repo.insert_credentials_tx(&mut tx, &credentials).await;
-        tx.commit().await.unwrap();
-        result
+        let rows_affected = self.credential_repo.insert_credentials_tx(&mut tx, &credentials).await;
+        
+        let result = match rows_affected {
+            1 => tx.commit().await.map(|_| true),
+            _ => tx.rollback().await.map(|_| false),
+        };
+
+        result.unwrap()
     }
 }
