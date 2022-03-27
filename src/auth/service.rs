@@ -9,6 +9,7 @@ use super::*;
 pub trait AuthServiceApi {
     async fn register(&self, credentials: Credentials) -> bool;
     async fn login(&self, credentials: Credentials) -> Option<Token>;
+    async fn authenticate(&self, token: Token) -> Option<String>;
 }
 
 pub struct AuthService<CR = PostgresCredentialRepo, TR = RedisTokenRepo>
@@ -69,6 +70,10 @@ where
         } else {
             None
         }
+    }
+
+    async fn authenticate(&self, token: Token) -> Option<String> {
+        self.token_repo.get_username(&token).await
     }
 }
 
