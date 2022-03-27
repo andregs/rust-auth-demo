@@ -4,7 +4,6 @@ use rocket::serde::json::Json;
 use rocket::{post, routes, State};
 
 use super::*;
-use super::service::AuthService;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("Auth Controller", |rocket| async {
