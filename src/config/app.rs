@@ -11,6 +11,7 @@ pub async fn build_rocket() -> Rocket<Build> {
     rocket::custom(provider)
         .attach(AdHoc::config::<AppConfig>())
         .attach(db::stage().await)
+        .attach(redis::stage().await)
         .attach(auth::controller::stage())
 }
 

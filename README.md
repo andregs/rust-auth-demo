@@ -45,3 +45,9 @@ Write the migration SQL scripts and execute it:
 ```sh
 sqlx migrate run --database-url $(dasel -f App.toml -r toml 'default.db.url')
 ```
+
+### Sping up Redis instance
+
+```sh
+docker run --name auth-demo-redis -d -p 6379:6379 redis
+```

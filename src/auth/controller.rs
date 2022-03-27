@@ -1,7 +1,7 @@
+use redis::Client;
 use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;
 use rocket::{post, routes, State};
-use sqlx::{Pool, Postgres};
 
 use super::*;
 use super::service::AuthService;
@@ -13,15 +13,17 @@ pub fn stage() -> AdHoc {
 }
 
 #[post("/register", format = "json", data = "<body>")]
-async fn register(db: &State<Pool<Postgres>>, body: Json<Credentials>) -> String {
-    let service = AuthService::new(db);
+async fn register(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> String {
+    let service = AuthService::new(db, redis);
     let result: bool = service.register(body.0).await;
     String::from(format!("Registered. {}", result))
 }
 
 #[post("/login", format = "json", data = "<body>")]
-async fn login(body: Json<Credentials>) -> String {
-    String::from(format!("Login done. {}", body.0.username))
+async fn login(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> Option<Token> {
+    let service = AuthService::new(db, redis);
+    // TODO 401 for bad credentials instead of 404
+    service.login(body.0).await
 }
 
 #[post("/authenticate", format = "text", data = "<body>")]
