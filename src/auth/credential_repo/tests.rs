@@ -52,7 +52,7 @@ mod check_credentials {
 // aux ----
 
 async fn before_each() -> (Transaction, PostgresCredentialRepo) {
-    let cfg = app::extract_config("test");
+    let cfg = app::test_config();
     let db = db::connect(&cfg.db.url).await;
     let tx = db.begin().await.unwrap();
     let repo = PostgresCredentialRepo;

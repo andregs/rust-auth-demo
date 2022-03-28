@@ -86,7 +86,7 @@ impl AuthService<MockCredentialRepoApi, MockTokenRepoApi> {
     // TODO AuthService unit tests connect to DB and trigger empty TXs, since
     // actual queries are mocked out, but ideally they shouldn't need a DB.
     async fn new() -> Self {
-        let cfg = app::extract_config("test");
+        let cfg = app::test_config();
         let db = db::connect(&cfg.db.url).await;
         let credential_repo = MockCredentialRepoApi::new();
         let token_repo = MockTokenRepoApi::new();

@@ -34,3 +34,10 @@ async fn authenticate(body: Token, db: &State<Connection>, redis: &State<Client>
 }
 
 // TODO http tests
+// TODO implement error handling
+// TODO publish to k8s
+// TODO health check
+// TODO graceful shutdown
+// TODO consume external http service (correlate requests)
+// TODO improve logging
+// TODO externalize more config attributes like pool size

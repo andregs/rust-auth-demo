@@ -26,16 +26,16 @@ impl RedisTokenRepo {
 impl TokenRepoApi for RedisTokenRepo {
     async fn save_token(&self, token: &Token, username: &str) {
         // redis-rs currently doesn't have connection pooling
-        let mut conn = self.client.get_async_connection().await.unwrap();
+        let mut conn = self.client.get_async_connection().await.unwrap(); // TODO handle error
         let key = get_key(token);
         let value = username;
-        conn.set(key, value).await.unwrap()
+        conn.set(key, value).await.unwrap() // TODO handle error
     }
 
     async fn get_username(&self, token: &Token) -> Option<String> {
-        let mut conn = self.client.get_async_connection().await.unwrap();
+        let mut conn = self.client.get_async_connection().await.unwrap(); // TODO handle error
         let key = get_key(token);
-        conn.get(key).await.unwrap()
+        conn.get(key).await.unwrap() // TODO handle error
     }
 }
 

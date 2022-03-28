@@ -23,9 +23,10 @@ fn config_provider() -> Figment {
         .select(Profile::from_env_or("APP_PROFILE", "default"))
 }
 
-pub fn extract_config(profile: &str) -> AppConfig {
+#[cfg(test)]
+pub fn test_config() -> AppConfig {
     config_provider()
-        .select(Profile::new(profile))
+        .select(Profile::new("test"))
         .extract()
         .unwrap()
 }

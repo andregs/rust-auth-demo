@@ -39,7 +39,7 @@ where
     TR: TokenRepoApi + Sync + Send,
 {
     async fn register(&self, credentials: Credentials) -> bool {
-        let mut tx = self.db.begin().await.unwrap();
+        let mut tx = self.db.begin().await.unwrap(); // TODO handle error
         let rows_affected = self
             .credential_repo
             .insert_credentials_tx(&mut tx, &credentials)
@@ -50,7 +50,7 @@ where
             _ => tx.rollback().await.map(|_| false),
         };
 
-        result.unwrap()
+        result.unwrap() // TODO handle error
     }
 
     async fn login(&self, credentials: Credentials) -> Option<Token> {
@@ -58,7 +58,7 @@ where
             .credential_repo
             .check_credentials_db(&self.db, &credentials)
             .await
-            .unwrap_or(false);
+            .unwrap_or(false); // TODO handle error
 
         if valid_credentials {
             let uuid = Uuid::new_v4().to_string();

@@ -45,8 +45,10 @@ impl PostgresCredentialRepo {
         )
         .execute(executor)
         .await
-        .unwrap()
+        .unwrap() // TODO handle error
         .rows_affected()
+        // constraint violation, optimistic locking, string too big
+        // other errors, like db offline
     }
     
     async fn check_credentials<'ex, EX>(&self, executor: EX, credentials: &Credentials) -> Option<bool>
@@ -63,7 +65,8 @@ impl PostgresCredentialRepo {
         )
         .fetch_optional(executor)
         .await
-        .unwrap()
+        .unwrap() // TODO handle error
+        // other errors, like db outage
     }
 }
 
