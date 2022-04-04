@@ -267,6 +267,7 @@ dependencies = [
  "rocket",
  "serde",
  "sqlx",
+ "thiserror",
  "uuid",
 ]
 

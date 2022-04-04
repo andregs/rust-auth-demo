@@ -32,7 +32,7 @@ sqlx migrate run --database-url $(dasel -f App.toml -r toml 'default.db.url')
 sqlx migrate run --database-url $(dasel -f App.toml -r toml 'test.db.url')
 ```
 
-### Sping up Redis instance
+### Spin up Redis instance
 
 ```sh
 docker run --name auth-demo-redis -d -p 6379:6379 redis

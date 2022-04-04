@@ -7,8 +7,11 @@ edition = "2021"
 
 [dependencies]
 async-trait = "0.1.52"
-rocket = { git = "https://github.com/SergioBenitez/Rocket", features = ["json"] }
 serde = "1.0.136"
+thiserror = "1.0.30"
+
+# TODO https://github.com/SergioBenitez/Rocket/issues/1893#issuecomment-1002393878
+rocket = { git = "https://github.com/SergioBenitez/Rocket", features = ["json"] }
 
 [dependencies.redis]
 version = "0.21.5"

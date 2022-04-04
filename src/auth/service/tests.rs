@@ -12,7 +12,7 @@ mod register {
         svc.credential_repo
             .expect_insert_credentials_tx()
             .once()
-            .return_const(1_u64);
+            .return_once(|_, _| Ok(1_u64));
 
         let (username, password) = ("a".into(), "b".into());
         let credentials = Credentials { username, password };
@@ -27,7 +27,7 @@ mod register {
             svc.credential_repo
                 .expect_insert_credentials_tx()
                 .once()
-                .return_const(case as u64);
+                .return_once(move |_, _| Ok(case as u64));
 
             let (username, password) = ("a".into(), "b".into());
             let credentials = Credentials { username, password };
@@ -46,7 +46,7 @@ mod login {
         svc.credential_repo
             .expect_check_credentials_db()
             .once()
-            .return_const(true);
+            .return_once(|_, _| Ok(true));
 
         svc.token_repo.expect_save_token().once().return_const(());
 
@@ -64,7 +64,7 @@ mod login {
         svc.credential_repo
             .expect_check_credentials_db()
             .once()
-            .return_const(false);
+            .return_once(|_, _| Ok(false));
 
         svc.token_repo.expect_save_token().never();
 

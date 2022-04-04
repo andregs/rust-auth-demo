@@ -45,7 +45,7 @@ where
             .insert_credentials_tx(&mut tx, &credentials)
             .await;
 
-        let result = match rows_affected {
+        let result = match rows_affected.unwrap() {
             1 => tx.commit().await.map(|_| true),
             _ => tx.rollback().await.map(|_| false),
         };
