@@ -14,10 +14,10 @@ pub fn stage() -> AdHoc {
 #[post("/register", format = "json", data = "<body>")]
 async fn register(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> String {
     let service = AuthService::new(db, redis);
-    let result: bool = service.register(body.0).await;
+    let new_id: i64 = service.register(body.0).await;
     
     // TODO 204 no content
-    String::from(format!("Registered. {}", result))
+    String::from(format!("Registered. {}", new_id))
 }
 
 #[post("/login", format = "json", data = "<body>")]

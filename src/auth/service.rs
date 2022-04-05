@@ -7,7 +7,7 @@ use super::*;
 
 #[async_trait]
 pub trait AuthServiceApi {
-    async fn register(&self, credentials: Credentials) -> bool;
+    async fn register(&self, credentials: Credentials) -> i64;
     async fn login(&self, credentials: Credentials) -> Option<Token>;
     async fn authenticate(&self, token: Token) -> Option<String>;
 }
@@ -38,19 +38,19 @@ where
     CR: CredentialRepoApi + Sync + Send,
     TR: TokenRepoApi + Sync + Send,
 {
-    async fn register(&self, credentials: Credentials) -> bool {
+    async fn register(&self, credentials: Credentials) -> i64 {
         let mut tx = self.db.begin().await.unwrap(); // TODO handle error
-        let rows_affected = self
+        let new_id = self
             .credential_repo
             .insert_credentials_tx(&mut tx, &credentials)
             .await;
 
-        let result = match rows_affected.unwrap() {
-            1 => tx.commit().await.map(|_| true),
-            _ => tx.rollback().await.map(|_| false),
+        let result = match new_id {
+            Ok(id) => tx.commit().await,
+            Err(_) => tx.rollback().await,
         };
 
-        result.unwrap() // TODO handle error
+        new_id.unwrap() // TODO handle error
     }
 
     async fn login(&self, credentials: Credentials) -> Option<Token> {

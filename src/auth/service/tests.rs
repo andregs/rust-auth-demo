@@ -7,33 +7,22 @@ mod register {
     use super::*;
 
     #[async_std::test]
-    async fn it_should_return_true_when_exactly_1_user_is_registered() {
+    async fn it_should_return_new_id_when_registration_is_ok() {
         let mut svc = before_each().await;
         svc.credential_repo
             .expect_insert_credentials_tx()
             .once()
-            .return_once(|_, _| Ok(1_u64));
+            .return_once(|_, _| Ok(1_i64));
 
         let (username, password) = ("a".into(), "b".into());
         let credentials = Credentials { username, password };
         let actual = svc.register(credentials).await;
-        assert_eq!(actual, true);
+        assert!(actual > 0);
     }
 
     #[async_std::test]
-    async fn it_should_return_false_when_not_exactly_1_user_is_registered() {
-        for case in vec![0, 2] {
-            let mut svc = before_each().await;
-            svc.credential_repo
-                .expect_insert_credentials_tx()
-                .once()
-                .return_once(move |_, _| Ok(case as u64));
-
-            let (username, password) = ("a".into(), "b".into());
-            let credentials = Credentials { username, password };
-            let actual = svc.register(credentials).await;
-            assert_eq!(actual, false);
-        }
+    async fn it_should_return_proper_error_when_registration_fails() {
+        todo!();
     }
 }
 

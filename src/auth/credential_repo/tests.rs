@@ -10,16 +10,16 @@ mod insert_credentials {
     async fn it_should_insert_good_credentials() {
         let (mut tx, repo) = before_each().await;
         let credentials = &new_random_credentials();
-        let rows_affected = repo.insert_credentials(&mut tx, credentials).await.unwrap();
-        assert_eq!(rows_affected, 1);
+        let new_id = repo.insert_credentials(&mut tx, credentials).await.unwrap();
+        assert!(new_id > 0);
     }
 
     #[async_std::test]
     async fn it_should_reject_duplicated_username() {
         let (mut tx, repo) = before_each().await;
         let credentials = &new_random_credentials();
-        let rows_affected = repo.insert_credentials(&mut tx, credentials).await.unwrap();
-        assert_eq!(rows_affected, 1);
+        let new_id = repo.insert_credentials(&mut tx, credentials).await.unwrap();
+        assert!(new_id > 0);
 
         let result = repo.insert_credentials(&mut tx, credentials).await;
         match result {
