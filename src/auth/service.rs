@@ -7,9 +7,9 @@ use super::*;
 
 #[async_trait]
 pub trait AuthServiceApi {
-    async fn register(&self, credentials: Credentials) -> i64;
-    async fn login(&self, credentials: Credentials) -> Option<Token>;
-    async fn authenticate(&self, token: Token) -> Option<String>;
+    async fn register(&self, credentials: Credentials) -> Result<i64>;
+    async fn login(&self, credentials: Credentials) -> Result<Token>;
+    async fn authenticate(&self, token: Token) -> Result<String>;
 }
 
 pub struct AuthService<CR = PostgresCredentialRepo, TR = RedisTokenRepo>
@@ -38,42 +38,47 @@ where
     CR: CredentialRepoApi + Sync + Send,
     TR: TokenRepoApi + Sync + Send,
 {
-    async fn register(&self, credentials: Credentials) -> i64 {
-        let mut tx = self.db.begin().await.unwrap(); // TODO handle error
+    async fn register(&self, credentials: Credentials) -> Result<i64> {
+        let mut tx = self.db.begin().await?;
         let new_id = self
             .credential_repo
             .insert_credentials_tx(&mut tx, &credentials)
             .await;
 
-        let result = match new_id {
-            Ok(id) => tx.commit().await,
-            Err(_) => tx.rollback().await,
-        };
+        match new_id {
+            Ok(_) => tx.commit().await?,
+            Err(_) => tx.rollback().await?,
+        }
 
-        new_id.unwrap() // TODO handle error
+        new_id
     }
 
-    async fn login(&self, credentials: Credentials) -> Option<Token> {
-        let valid_credentials = self
+    async fn login(&self, credentials: Credentials) -> Result<Token> {
+        let is_valid = self
             .credential_repo
             .check_credentials_db(&self.db, &credentials)
-            .await
-            .unwrap_or(false); // TODO handle error
+            .await;
 
-        if valid_credentials {
-            let uuid = Uuid::new_v4().to_string();
-            self.token_repo
-                .save_token(&uuid, &credentials.username)
-                .await;
+        match is_valid {
+            Ok(true) => {
+                let uuid = Uuid::new_v4().to_string();
+                let result = self
+                    .token_repo
+                    .save_token(&uuid, &credentials.username)
+                    .await; // TODO handle redis failure
 
-            Some(uuid)
-        } else {
-            None
+                Ok(uuid)
+            }
+            Ok(false) => Err(Error::BadCredentials),
+            Err(err) => Err(err),
         }
     }
 
-    async fn authenticate(&self, token: Token) -> Option<String> {
-        self.token_repo.get_username(&token).await
+    async fn authenticate(&self, token: Token) -> Result<String> {
+        self.token_repo
+            .get_username(&token)
+            .await
+            .ok_or(Error::BadToken)
     }
 }
 

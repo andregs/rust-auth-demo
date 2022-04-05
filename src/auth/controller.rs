@@ -14,23 +14,23 @@ pub fn stage() -> AdHoc {
 #[post("/register", format = "json", data = "<body>")]
 async fn register(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> String {
     let service = AuthService::new(db, redis);
-    let new_id: i64 = service.register(body.0).await;
+    let new_id: i64 = service.register(body.0).await.unwrap();
     
     // TODO 204 no content
     String::from(format!("Registered. {}", new_id))
 }
 
 #[post("/login", format = "json", data = "<body>")]
-async fn login(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> Option<Token> {
+async fn login(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> Token {
     let service = AuthService::new(db, redis);
     // TODO 401 for bad credentials instead of 404
-    service.login(body.0).await
+    service.login(body.0).await.unwrap()
 }
 
 #[post("/authenticate", format = "text", data = "<body>")]
-async fn authenticate(body: Token, db: &State<Connection>, redis: &State<Client>) -> Option<String> {
+async fn authenticate(body: Token, db: &State<Connection>, redis: &State<Client>) -> String {
     let service = AuthService::new(db, redis);
-    service.authenticate(body).await
+    service.authenticate(body).await.unwrap()
 }
 
 // TODO http tests

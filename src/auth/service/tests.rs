@@ -16,7 +16,7 @@ mod register {
 
         let (username, password) = ("a".into(), "b".into());
         let credentials = Credentials { username, password };
-        let actual = svc.register(credentials).await;
+        let actual = svc.register(credentials).await.unwrap();
         assert!(actual > 0);
     }
 
@@ -59,9 +59,13 @@ mod login {
 
         let (username, password) = ("a".into(), "b".into());
         let credentials = Credentials { username, password };
-
+        
         let actual = svc.login(credentials).await;
-        assert_eq!(actual, None);
+        
+        match actual {
+            Err(Error::BadCredentials) => (/* life is good */),
+            _ => panic!("expected bad credentials error."),
+        }
     }
 }
 

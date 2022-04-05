@@ -1,12 +1,10 @@
 use async_trait::async_trait;
 use sqlx::{Executor, Pool, Postgres};
-use std::borrow::Cow;
 
 use super::*;
 
 pub type Connection = Pool<Postgres>;
 pub type Transaction = sqlx::Transaction<'static, Postgres>;
-type Result<T> = core::result::Result<T, Error>;
 
 #[cfg_attr(test, mockall::automock)]
 #[async_trait]
@@ -71,35 +69,6 @@ impl CredentialRepoApi for PostgresCredentialRepo {
 
     async fn check_credentials_tx(&self, tx: &mut Transaction, credentials: &Credentials) -> Result<bool> {
         self.check_credentials(tx, credentials).await
-    }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("Duplicated username.")]
-    Duplicated,
-
-    #[error("Username is too big.")]
-    TooBig,
-    
-    #[error("What!?")]
-    Unknown,
-}
-
-impl From<sqlx::Error> for Error {
-    fn from(err: sqlx::Error) -> Self {
-        if let sqlx::Error::Database(ref err) = err {
-            // https://www.postgresql.org/docs/current/errcodes-appendix.html
-            if err.code() == Some(Cow::from("23505")) {
-                return Error::Duplicated;
-            } else if err.code() == Some(Cow::from("22001")) {
-                return Error::TooBig;
-            }
-        }
-
-        // TODO proper log the backtrace
-        eprintln!("Unknown {:?}", err);
-        Error::Unknown
     }
 }
 
