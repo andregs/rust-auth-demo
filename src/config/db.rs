@@ -5,7 +5,7 @@ use super::*;
 
 pub async fn stage() -> AdHoc {
     AdHoc::on_ignite("Connect to DB", |rocket| async {
-        let config = rocket.state::<AppConfig>().unwrap(); // TODO handle error
+        let config = rocket.state::<AppConfig>().expect("Missing app configuration.");
         println!("DB URL = {}", config.db.url);
         let db = connect(&config.db.url).await;
         rocket.manage(db)
@@ -17,5 +17,5 @@ pub async fn connect(database_url: &String) -> Pool<Postgres> {
         .max_connections(5)
         .connect(database_url)
         .await
-        .expect("Unable to connect") // TODO handle error
+        .expect("Unable to connect")
 }
