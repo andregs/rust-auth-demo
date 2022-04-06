@@ -37,7 +37,10 @@ mod login {
             .once()
             .return_once(|_, _| Ok(true));
 
-        svc.token_repo.expect_save_token().once().return_const(());
+        svc.token_repo
+            .expect_save_token()
+            .once()
+            .return_once(|_, _| Ok(()));
 
         let (username, password) = ("a".into(), "b".into());
         let credentials = Credentials { username, password };

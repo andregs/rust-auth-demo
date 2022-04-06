@@ -6,8 +6,8 @@ use super::*;
 #[cfg_attr(test, mockall::automock)]
 #[async_trait]
 pub trait TokenRepoApi {
-    async fn save_token(&self, token: &Token, username: &str);
-    async fn get_username(&self, token: &Token) -> Option<String>;
+    async fn save_token(&self, token: &Token, username: &str) -> Result<()>;
+    async fn get_username(&self, token: &Token) -> Result<String>;
 }
 
 pub struct RedisTokenRepo {
@@ -24,18 +24,20 @@ impl RedisTokenRepo {
 
 #[async_trait]
 impl TokenRepoApi for RedisTokenRepo {
-    async fn save_token(&self, token: &Token, username: &str) {
+    async fn save_token(&self, token: &Token, username: &str) -> Result<()> {
         // redis-rs currently doesn't have connection pooling
-        let mut conn = self.client.get_async_connection().await.unwrap(); // TODO handle error
+        let mut conn = self.client.get_async_connection().await?;
         let key = get_key(token);
         let value = username;
-        conn.set(key, value).await.unwrap() // TODO handle error
+        conn.set(key, value).await?;
+        Ok(())
     }
 
-    async fn get_username(&self, token: &Token) -> Option<String> {
-        let mut conn = self.client.get_async_connection().await.unwrap(); // TODO handle error
+    async fn get_username(&self, token: &Token) -> Result<String> {
+        let mut conn = self.client.get_async_connection().await?;
         let key = get_key(token);
-        conn.get(key).await.unwrap() // TODO handle error
+        let value: Option<String> = conn.get(key).await?;
+        value.ok_or(Error::BadToken)
     }
 }
 

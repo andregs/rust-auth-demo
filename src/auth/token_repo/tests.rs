@@ -9,13 +9,16 @@ async fn test_save_and_check() {
     let token = Uuid::new_v4().to_string();
     let username = "username".to_string();
     
-    assert!(repo.get_username(&token).await.is_none());
+    match repo.get_username(&token).await {
+        Err(Error::BadToken) => (/* good */),
+        _ => panic!("bad token error was expected"),
+    }
     
-    repo.save_token(&token, &username).await;
-    let actual = repo.get_username(&token).await;
+    repo.save_token(&token, &username).await.unwrap();
+    let actual = repo.get_username(&token).await
+        .expect("username was expected");
 
-    assert!(actual.is_some());
-    assert_eq!(actual.unwrap(), username);
+    assert_eq!(actual, username);
 }
 
 // aux ----

@@ -45,3 +45,11 @@ impl From<sqlx::Error> for Error {
         Error::Unknown
     }
 }
+
+impl From<redis::RedisError> for Error {
+    fn from(err: redis::RedisError) -> Self {
+        // TODO proper log the backtrace
+        eprintln!("Unknown {:?}", err);
+        Error::Unknown
+    }
+}
