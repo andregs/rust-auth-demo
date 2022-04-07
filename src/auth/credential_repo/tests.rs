@@ -24,8 +24,9 @@ mod insert_credentials {
         let result = repo.insert_credentials(&mut tx, credentials).await;
         match result {
             // TODO one day we'll have assert_matches https://github.com/rust-lang/rust/issues/82775
-            Err(Error::Duplicated) => (),
-            bad => panic!("Unexpected {:?}", bad),
+            Err(Error::Duplicated(_)) => (/* alright */),
+            Err(e) => panic!("unexpected error: {:?}", e),
+            Ok(id) => panic!("unexpected id: {:?}", id),
         }
     }
 
@@ -37,8 +38,9 @@ mod insert_credentials {
 
         let result = repo.insert_credentials(&mut tx, &credentials).await;
         match result {
-            Err(Error::TooBig) => (),
-            bad => panic!("Unexpected {:?}", bad),
+            Err(Error::TooBig(_)) => (/* ❤ boilerplate */),
+            Err(e) => panic!("unexpected error {:?}", e),
+            Ok(id) => panic!("unexpected id: {:?}", id),
         }
     }
 

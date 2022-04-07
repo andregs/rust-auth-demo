@@ -11,7 +11,8 @@ async fn test_save_and_check() {
     
     match repo.get_username(&token).await {
         Err(Error::BadToken) => (/* good */),
-        _ => panic!("bad token error was expected"),
+        Err(e) => panic!("unexpected error: {:?}", e),
+        Ok(username) => panic!("unexpected username: {}", username),
     }
     
     repo.save_token(&token, &username).await.unwrap();

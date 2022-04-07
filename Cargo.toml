@@ -13,6 +13,10 @@ thiserror = "1.0.30"
 # TODO https://github.com/SergioBenitez/Rocket/issues/1893#issuecomment-1002393878
 rocket = { git = "https://github.com/SergioBenitez/Rocket", features = ["json"] }
 
+[dependencies.anyhow]
+version = "1.0.56"
+features = ["backtrace"]
+
 [dependencies.redis]
 version = "0.21.5"
 features = ["tokio-comp"]

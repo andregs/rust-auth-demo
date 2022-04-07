@@ -1,3 +1,4 @@
+use anyhow::Context;
 use async_trait::async_trait;
 use redis::{AsyncCommands, Client};
 
@@ -26,17 +27,19 @@ impl RedisTokenRepo {
 impl TokenRepoApi for RedisTokenRepo {
     async fn save_token(&self, token: &Token, username: &str) -> Result<()> {
         // redis-rs currently doesn't have connection pooling
-        let mut conn = self.client.get_async_connection().await?;
+        let mut conn = self.client.get_async_connection().await
+            .context("Unable to connect to Redis")?;
         let key = get_key(token);
         let value = username;
-        conn.set(key, value).await?;
+        conn.set(key, value).await.context("Unable to store the token")?;
         Ok(())
     }
 
     async fn get_username(&self, token: &Token) -> Result<String> {
-        let mut conn = self.client.get_async_connection().await?;
+        let mut conn = self.client.get_async_connection().await
+            .context("Unable to connect to Redis")?;
         let key = get_key(token);
-        let value: Option<String> = conn.get(key).await?;
+        let value: Option<String> = conn.get(key).await.context("Unable to fetch the username")?;
         value.ok_or(Error::BadToken)
     }
 }

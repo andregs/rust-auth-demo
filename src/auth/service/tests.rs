@@ -67,7 +67,8 @@ mod login {
         
         match actual {
             Err(Error::BadCredentials) => (/* life is good */),
-            _ => panic!("expected bad credentials error."),
+            Err(e) => panic!("unexpected error: {:?}", e),
+            Ok(token) => panic!("unexpected token: {}", token),
         }
     }
 }

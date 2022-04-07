@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use rocket::serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
@@ -14,10 +15,10 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Duplicated username.")]
-    Duplicated,
+    Duplicated(#[source] sqlx::Error),
 
     #[error("Username is too big.")]
-    TooBig,
+    TooBig(#[source] sqlx::Error),
 
     #[error("Username and/or password mismatch.")]
     BadCredentials,
@@ -26,30 +27,20 @@ pub enum Error {
     BadToken,
 
     #[error("Sorry, we failed.")]
-    Unknown,
+    Other(#[from] anyhow::Error),
 }
 
 impl From<sqlx::Error> for Error {
-    fn from(err: sqlx::Error) -> Self {
-        if let sqlx::Error::Database(ref err) = err {
+    fn from(source: sqlx::Error) -> Self {
+        if let sqlx::Error::Database(ref err) = source {
             // https://www.postgresql.org/docs/current/errcodes-appendix.html
             if err.code() == Some(Cow::from("23505")) {
-                return Error::Duplicated;
+                return Error::Duplicated(source);
             } else if err.code() == Some(Cow::from("22001")) {
-                return Error::TooBig;
+                return Error::TooBig(source);
             }
         }
 
-        // TODO proper log the backtrace
-        eprintln!("Unknown {:?}", err);
-        Error::Unknown
-    }
-}
-
-impl From<redis::RedisError> for Error {
-    fn from(err: redis::RedisError) -> Self {
-        // TODO proper log the backtrace
-        eprintln!("Unknown {:?}", err);
-        Error::Unknown
+        Error::Other(anyhow!(source))
     }
 }
