@@ -1,4 +1,4 @@
-mod model;
+pub mod model;
 pub mod controller;
 mod service;
 mod credential_repo;

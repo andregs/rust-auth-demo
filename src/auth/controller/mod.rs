@@ -50,7 +50,6 @@ struct RestError {
 
 mod error;
 
-// TODO http tests
 // TODO publish to k8s
 // TODO health check
 // TODO graceful shutdown
