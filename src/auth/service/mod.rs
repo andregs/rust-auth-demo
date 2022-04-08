@@ -1,4 +1,4 @@
-use async_trait::async_trait;
+use rocket::async_trait;
 use redis::Client;
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;

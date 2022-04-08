@@ -2,8 +2,7 @@ use redis::Client;
 use rocket::fairing::AdHoc;
 use rocket::{http::Status, post, routes, State};
 use rocket::response::status::{Custom, Created};
-use rocket::serde::json::Json;
-use serde::Serialize;
+use rocket::serde::{json::Json, Serialize};
 use uuid::Uuid;
 
 use super::*;

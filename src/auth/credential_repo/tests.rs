@@ -1,3 +1,4 @@
+use rocket::async_test;
 use uuid::Uuid;
 
 use super::*;
@@ -6,7 +7,7 @@ use crate::config::*;
 mod insert_credentials {
     use super::*;
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_insert_good_credentials() {
         let (mut tx, repo) = before_each().await;
         let credentials = &new_random_credentials();
@@ -14,7 +15,7 @@ mod insert_credentials {
         assert!(new_id > 0);
     }
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_reject_duplicated_username() {
         let (mut tx, repo) = before_each().await;
         let credentials = &new_random_credentials();
@@ -30,7 +31,7 @@ mod insert_credentials {
         }
     }
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_reject_username_too_big() {
         let (mut tx, repo) = before_each().await;
         let mut credentials = new_random_credentials();
@@ -50,7 +51,7 @@ mod insert_credentials {
 mod check_credentials {
     use super::*;
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_find_valid_credentials() {
         let (mut tx, repo) = before_each().await;
         let credentials = &new_random_credentials();
@@ -60,7 +61,7 @@ mod check_credentials {
         assert!(is_valid);
     }
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_not_find_when_username_is_wrong() {
         let (mut tx, repo) = before_each().await;
         let credentials = new_random_credentials();
@@ -69,7 +70,7 @@ mod check_credentials {
         assert!(is_valid == false);
     }
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_not_find_when_password_is_wrong() {
         let (mut tx, repo) = before_each().await;
         let mut credentials = new_random_credentials();

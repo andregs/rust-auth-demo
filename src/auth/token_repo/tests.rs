@@ -1,9 +1,10 @@
+use rocket::async_test;
 use uuid::Uuid;
 
 use super::*;
 use crate::config::*;
 
-#[async_std::test]
+#[async_test]
 async fn test_save_and_check() {
     let repo = before_each();
     let token = Uuid::new_v4().to_string();

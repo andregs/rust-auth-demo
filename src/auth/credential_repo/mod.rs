@@ -1,4 +1,4 @@
-use async_trait::async_trait;
+use rocket::async_trait;
 use sqlx::{Executor, Pool, Postgres};
 
 use super::*;

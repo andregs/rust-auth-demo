@@ -1,3 +1,4 @@
+use rocket::async_test;
 use uuid::Variant;
 
 use super::*;
@@ -6,7 +7,7 @@ use crate::config::*;
 mod register {
     use super::*;
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_return_new_id_when_registration_is_ok() {
         let mut svc = before_each().await;
         svc.credential_repo
@@ -20,7 +21,7 @@ mod register {
         assert!(actual > 0);
     }
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_return_proper_error_when_registration_fails() {
         todo!();
     }
@@ -29,7 +30,7 @@ mod register {
 mod login {
     use super::*;
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_return_uuid_token_when_login_is_ok() {
         let mut svc = before_each().await;
         svc.credential_repo
@@ -50,7 +51,7 @@ mod login {
         assert_eq!(actual.get_variant(), Variant::RFC4122);
     }
 
-    #[async_std::test]
+    #[async_test]
     async fn it_should_not_return_uuid_token_when_login_fails() {
         let mut svc = before_each().await;
         svc.credential_repo

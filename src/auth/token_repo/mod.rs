@@ -1,5 +1,5 @@
 use anyhow::Context;
-use async_trait::async_trait;
+use rocket::async_trait;
 use redis::{AsyncCommands, Client};
 
 use super::*;

@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use rocket::serde::Deserialize;
 
 pub mod app;
 pub mod db;
