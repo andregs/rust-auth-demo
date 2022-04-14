@@ -33,6 +33,8 @@ skaffold dev -m migrations --iterative-status-check --port-forward
 APP_PROFILE=local cargo run
 ```
 
+https://user-images.githubusercontent.com/712092/163493261-8ed6b178-9eed-4417-a6cd-42e356b91d3e.mp4
+
 ## More details
 
 Use `kubectl` to generate k8s yaml files (and customize them according your needs).
