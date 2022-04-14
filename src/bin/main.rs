@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 use auth::config;
 
 #[rocket::launch]

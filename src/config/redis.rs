@@ -6,7 +6,6 @@ use super::*;
 pub async fn stage() -> AdHoc {
     AdHoc::on_ignite("Connect to Redis", |rocket| async {
         let config = rocket.state::<AppConfig>().expect("Missing app configuration.");
-        println!("Redis URL = {}", config.redis.url);
         let client = open(&config.redis.url);
         rocket.manage(client)
     })

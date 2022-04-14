@@ -1,8 +1,17 @@
-[default.db]
-url = "postgres://postgres:mysecretpassword@localhost/auth_demo"
+# TODO should this file & sqlx-data.json live under src?
+# TODO config map out of this file
 
-[default.redis]
-url = "redis://localhost:6379"
+[default]
+db = {url = "postgres://postgres:mysecretpassword@postgres/auth_demo"}
+redis = {url = "redis://redis:6379"}
+log_level = "normal"
+cli_colors = false
 
-[test.db]
-url = "postgres://postgres:mysecretpassword@localhost/auth_demo_tests"
+[local]
+db = {url = "postgres://postgres:mysecretpassword@localhost/auth_demo"}
+redis = {url = "redis://localhost:6379"}
+cli_colors = true
+
+[test]
+db = {url = "postgres://postgres:mysecretpassword@localhost/auth_demo_tests"}
+redis = {url = "redis://localhost:6379"}

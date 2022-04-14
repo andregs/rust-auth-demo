@@ -1,0 +1,38 @@
+# kubectl create job migrations --image=rust:1.60 --dry-run=client -o yaml > ops/k8s/migrations/migrations-job.yaml
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  creationTimestamp: null
+  # TODO unique name might be needed to ensure migrations are executed on every deploy
+  name: migrations
+spec:
+  backoffLimit: 4 # try job 5 times
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      volumes:
+      - name: migrations-dir
+        hostPath:
+          path: /mnt/host/migrations
+          type: Directory
+      containers:
+      - image: andregs/sqlx
+        name: migrations
+        resources: {}
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          cd /app \
+          && sqlx migrate run --database-url postgres://postgres:mysecretpassword@postgres/auth_demo \
+          && sqlx database reset -y --database-url postgres://postgres:mysecretpassword@postgres/auth_demo_tests \
+        volumeMounts:
+        - mountPath: /app/migrations
+          name: migrations-dir
+          readOnly: true
+        
+      # pod's container will not be restarted upon failure, but
+      # will result in a new pod for the job until backoffLimit
+      restartPolicy: Never
+status: {}

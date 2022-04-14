@@ -1,0 +1,43 @@
+# kubectl create deployment auth --image=andregs/auth --dry-run=client -o yaml > ops/k8s/app/auth-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: auth
+  name: auth
+spec:
+  replicas: 1 # TODO increase me
+  selector:
+    matchLabels:
+      app: auth
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: auth
+    spec:
+      volumes:
+      - name: config-file # TODO configmap
+        hostPath:
+          path: /mnt/host/App.toml
+          type: File
+      # this init container was manually added
+      initContainers:
+      - name: auth-init
+        image: groundnuty/k8s-wait-for
+        args: [job-wr, migrations] # nice, but I can't delete finished jobs
+      containers:
+      - image: andregs/auth
+        name: auth
+        resources: {}
+        env:
+        - name: RUST_BACKTRACE
+          value: "1"
+        volumeMounts:
+        - mountPath: /workspace/App.toml
+          name: config-file
+          readOnly: true
+status: {}

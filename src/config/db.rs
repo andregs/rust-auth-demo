@@ -6,7 +6,6 @@ use super::*;
 pub async fn stage() -> AdHoc {
     AdHoc::on_ignite("Connect to DB", |rocket| async {
         let config = rocket.state::<AppConfig>().expect("Missing app configuration.");
-        println!("DB URL = {}", config.db.url);
         let db = connect(&config.db.url).await;
         rocket.manage(db)
     })

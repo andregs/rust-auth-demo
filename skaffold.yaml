@@ -1,0 +1,74 @@
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: storage
+deploy:
+  kubectl:
+    manifests:
+    - ./ops/k8s/storage/*.yaml
+portForward:
+- resourceType: service
+  resourceName: postgres
+  port: 5432
+
+---
+
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: migrations
+build:
+  artifacts:
+  - image: andregs/sqlx
+    docker:
+      dockerfile: ops/docker/sqlx.dockerfile
+  local: 
+    useDockerCLI: false
+    useBuildkit: false
+deploy:
+  kubectl:
+    manifests:
+    - ./ops/k8s/migrations/*.yaml
+requires:
+- configs: ["storage"]
+
+---
+
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: app
+build:
+  artifacts:
+  - image: andregs/auth
+    buildpacks:
+      builder: paketobuildpacks/builder:full
+      # see https://github.com/paketo-community/rust
+      buildpacks:
+      - paketo-community/rustup
+      - paketo-community/rust-dist
+      - paketo-community/cargo
+      - paketo-buildpacks/procfile@5.1.0
+      dependencies:
+        paths:
+        - src
+        - tests
+        - App.toml
+        - Cargo.lock
+        - Cargo.toml
+        - Procfile
+        - sqlx-data.json
+# test:
+# - image: andregs/auth
+#   custom:
+#   - command: cargo test # executed locally, not in the cluster :/
+deploy:
+  kubectl:
+    manifests:
+    - ./ops/k8s/app/*.yaml
+portForward:
+- resourceType: service
+  resourceName: auth
+  port: 8000
+requires:
+- configs: ["migrations"]

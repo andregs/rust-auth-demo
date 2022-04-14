@@ -24,7 +24,7 @@ impl PostgresCredentialRepo {
     where
         EX: 'ex + Executor<'ex, Database = Postgres>,
     {
-        // .env file contains a DB url that sqlx macros use on compile-time to validate these queries
+        // sqlx validates query strings on compile-time
         sqlx::query!(
             r#"INSERT INTO credentials (username, password)
             VALUES ($1, crypt($2, gen_salt('bf')))

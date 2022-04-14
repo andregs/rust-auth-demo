@@ -1,0 +1,20 @@
+# kubectl create service clusterip auth --tcp=8000:8000 -o yaml --dry-run=client > ops/k8s/app/auth-service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: auth
+  name: auth
+spec:
+  ports:
+  - name: 8000-8000
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: auth
+  type: ClusterIP
+status:
+  loadBalancer: {}
