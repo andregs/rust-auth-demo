@@ -9,7 +9,7 @@ impl From<Error> for Custom<Json<RestError>> {
             Error::Duplicated(_) | Error::TooBig(_) => Custom(Status::BadRequest, body),
             Error::BadCredentials | Error::BadToken => Custom(Status::Unauthorized, body),
             Error::Other(source) => {
-                // TODO proper logging
+                // TODO proper logging https://github.com/SergioBenitez/Rocket/issues/21
                 eprintln!("Oops... {:?}", source);
                 Custom(Status::InternalServerError, body)
             },

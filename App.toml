@@ -15,3 +15,4 @@ cli_colors = true
 [test]
 db = {url = "postgres://postgres:mysecretpassword@localhost/auth_demo_tests"}
 redis = {url = "redis://localhost:6379"}
+log_level = "critical"

@@ -19,7 +19,10 @@ pub fn stage() -> AdHoc {
 async fn register(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> RestResult<Created<&'static str>> {
     let service = AuthService::new(db, redis);
     let new_id: i64 = service.register(body.0).await?;
-    let location = format!("/profile/{}", new_id); // TODO rocket::uri!
+    
+    // TODO create a /profile/<username> route that requires authentication
+    let location = format!("/profile/{}", new_id); // TODO use rocket::uri!
+
     let body = Created::new(location);
     Ok(body)
 }
@@ -50,9 +53,7 @@ struct RestError {
 
 mod error;
 
-// TODO publish to k8s
 // TODO health check
 // TODO graceful shutdown
 // TODO consume external http service (correlate requests)
-// TODO improve logging
 // TODO externalize more config attributes like pool size

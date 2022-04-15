@@ -11,9 +11,9 @@ lazy_static! {
     static ref CLIENT: DoubleCheckedCell<Client> = DoubleCheckedCell::new();
 }
 
-// TODO config env so that these tests execute against test DB (reset it before tests)
-
 async fn get_client() -> &'static Client {
+    // TODO automate the clearing of test database before each execution
+    std::env::set_var("APP_PROFILE", "test");
     CLIENT
         .get_or_init(async {
             let server = config::app::build_rocket().await;

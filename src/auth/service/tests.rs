@@ -5,6 +5,7 @@ use super::*;
 use crate::config::*;
 
 mod register {
+    use anyhow::anyhow;
     use super::*;
 
     #[async_test]
@@ -23,7 +24,21 @@ mod register {
 
     #[async_test]
     async fn it_should_return_proper_error_when_registration_fails() {
-        todo!();
+        let mut svc = before_each().await;
+        svc.credential_repo
+            .expect_insert_credentials_tx()
+            .once()
+            .return_once(|_, _| Err(Error::Other(anyhow!("oops!"))));
+
+        let (username, password) = ("a".into(), "b".into());
+        let credentials = Credentials { username, password };
+        let actual = svc.register(credentials).await;
+        
+        match actual {
+            Err(Error::Other(_)) => (/* love my job */),
+            Err(e) => panic!("unexpected error: {:?}", e),
+            Ok(id) => panic!("unexpected id: {}", id),
+        }
     }
 }
 

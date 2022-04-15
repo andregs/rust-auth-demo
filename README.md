@@ -26,13 +26,6 @@ skaffold dev --trigger=manual --iterative-status-check
 
 [Skaffold](https://skaffold.dev/docs/install/) will build the app, deploy it in the cluster, watch for code changes and cleanup on quit.
 
-If you want to execute the app locally:
-
-```sh
-skaffold dev -m migrations --iterative-status-check --port-forward
-APP_PROFILE=local cargo run
-```
-
 https://user-images.githubusercontent.com/712092/163493261-8ed6b178-9eed-4417-a6cd-42e356b91d3e.mp4
 
 ## More details
@@ -41,6 +34,22 @@ Use `kubectl` to generate k8s yaml files (and customize them according your need
 
 ```sh
 kubectl create blablabla --dry-run=client -o yaml > ops/k8s/file.yaml
+```
+
+### Local Dev
+
+Execute the app locally:
+
+```sh
+skaffold dev -m migrations --iterative-status-check --port-forward
+APP_PROFILE=local cargo run
+```
+
+Execute the tests locally:
+
+```sh
+skaffold dev -m migrations --iterative-status-check --port-forward
+DATABASE_URL=$(dasel -f App.toml -r toml test.db.url) sqlx database reset -y && cargo test
 ```
 
 ### Initialize skaffold project
