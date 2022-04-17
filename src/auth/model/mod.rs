@@ -1,12 +1,5 @@
-use anyhow::anyhow;
-use rocket::serde::{Deserialize, Serialize};
-use std::borrow::Cow;
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
-pub struct Credentials {
-    pub username: String,
-    pub password: String,
-}
+use rocket::response::status::Custom;
+use rocket::serde::{json::Json, Deserialize, Serialize};
 
 pub type Token = String;
 
@@ -20,7 +13,11 @@ pub struct AuthOk {
     pub username: String,
 }
 
-pub type Result<T> = core::result::Result<T, Error>;
+mod credentials;
+pub use credentials::*;
 
-pub mod error;
-use error::*;
+mod error;
+pub use error::*;
+
+pub type HttpResult<T> = core::result::Result<T, Custom<Json<HttpError>>>;
+pub type Result<T> = core::result::Result<T, Error>;

@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use auth::config;
+use rust_auth_demo::config;
 
 #[rocket::launch]
 async fn from_the_earth_to_the_moon() -> _ {

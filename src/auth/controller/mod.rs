@@ -1,24 +1,23 @@
 use redis::Client;
+use rocket::{catchers, post, routes, State};
 use rocket::fairing::AdHoc;
-use rocket::{http::Status, post, routes, State};
-use rocket::response::status::{Custom, Created};
-use rocket::serde::{json::Json, Serialize};
-use uuid::Uuid;
+use rocket::response::status::Created;
+use rocket::serde::json::Json;
 
 use super::*;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("Auth Controller", |rocket| async {
-        rocket.mount("/", routes![register, login, authenticate])
+        rocket
+            .mount("/", routes![register, login, authenticate])
+            .register("/", catchers![default_catcher])
     })
 }
 
-// TODO input validation
-
 #[post("/register", format = "json", data = "<body>")]
-async fn register(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> RestResult<Created<&'static str>> {
+async fn register(body: Credentials, db: &State<Connection>, redis: &State<Client>) -> HttpResult<Created<&'static str>> {
     let service = AuthService::new(db, redis);
-    let new_id: i64 = service.register(body.0).await?;
+    let new_id: i64 = service.register(body).await?;
     
     // TODO create a /profile/<username> route that requires authentication
     let location = format!("/profile/{}", new_id); // TODO use rocket::uri!
@@ -28,32 +27,22 @@ async fn register(body: Json<Credentials>, db: &State<Connection>, redis: &State
 }
 
 #[post("/login", format = "json", data = "<body>")]
-async fn login(body: Json<Credentials>, db: &State<Connection>, redis: &State<Client>) -> RestResult<Json<LoginOk>> {
+async fn login(body: Credentials, db: &State<Connection>, redis: &State<Client>) -> HttpResult<Json<LoginOk>> {
     let service = AuthService::new(db, redis);
-    let token = service.login(body.0).await?;
+    let token = service.login(body).await?;
     let body = Json(LoginOk{ token });
     Ok(body)
 }
 
 #[post("/authenticate", format = "text", data = "<body>")]
-async fn authenticate(body: Token, db: &State<Connection>, redis: &State<Client>) -> RestResult<Json<AuthOk>> {
+async fn authenticate(body: Token, db: &State<Connection>, redis: &State<Client>) -> HttpResult<Json<AuthOk>> {
     let service = AuthService::new(db, redis);
     let username = service.authenticate(body).await?;
     let body = Json(AuthOk{ username });
     Ok(body)
 }
 
-type RestResult<T> = core::result::Result<T, Custom<Json<RestError>>>;
-
-#[derive(Serialize)]
-struct RestError {
-    id: String,
-    msg: String,
-}
-
-mod error;
-
 // TODO health check
 // TODO graceful shutdown
 // TODO consume external http service (correlate requests)
-// TODO externalize more config attributes like pool size
+// TODO externalize more config attributes (e.g. pool size)

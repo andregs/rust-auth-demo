@@ -152,22 +152,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "auth"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "double-checked-cell-async",
- "lazy_static",
- "mockall",
- "redis",
- "rocket",
- "serde",
- "sqlx",
- "thiserror",
- "uuid",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -907,6 +891,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "lazy-regex"
+version = "2.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6b12f2eb6ed7d39405c5eb25a034b4c106a9ad87a6d9be3298de6c5f32fd57d"
+dependencies = [
+ "lazy-regex-proc_macros",
+ "once_cell",
+ "regex",
+]
+
+[[package]]
+name = "lazy-regex-proc_macros"
+version = "2.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2496e5264069bc726ccf37eb76b9cd89406ae110d836c3f76729f99c8a23293"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "regex",
+ "syn",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1539,6 +1546,24 @@ dependencies = [
  "time",
  "tokio",
  "uncased",
+]
+
+[[package]]
+name = "rust-auth-demo"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "double-checked-cell-async",
+ "lazy-regex",
+ "lazy_static",
+ "mockall",
+ "redis",
+ "rocket",
+ "serde",
+ "sqlx",
+ "thiserror",
+ "unicode-segmentation",
+ "uuid",
 ]
 
 [[package]]

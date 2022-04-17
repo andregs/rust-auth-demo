@@ -1,5 +1,5 @@
 [package]
-name = "auth"
+name = "rust-auth-demo"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,7 +9,9 @@ edition = "2021"
 opt-level = 3 # https://github.com/launchbadge/sqlx
 
 [dependencies]
+lazy-regex = "2.3.0"
 thiserror = "1.0.30"
+unicode-segmentation = "1.9.0"
 
 [dependencies.anyhow]
 version = "1.0.56"

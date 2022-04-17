@@ -5,7 +5,7 @@ use rocket::http::{Status, ContentType};
 use rocket::local::asynchronous::Client;
 use uuid::{Uuid, Variant::RFC4122};
 
-use auth::{config, auth::model::*};
+use rust_auth_demo::{config, auth::model::*};
 
 lazy_static! {
     static ref CLIENT: DoubleCheckedCell<Client> = DoubleCheckedCell::new();
@@ -26,7 +26,7 @@ async fn get_client() -> &'static Client {
 
 #[async_test]
 async fn it_should_execute_e2e_happy_path() {
-    let (username, password) = ("foo", "bar");
+    let (username, password) = ("foo", "bar12345");
     let client = get_client().await;
     
     // registration

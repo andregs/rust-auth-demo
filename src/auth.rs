@@ -8,5 +8,3 @@ use model::*;
 use service::*;
 use credential_repo::*;
 use token_repo::*;
-
-pub use model::error::*;
