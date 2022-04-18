@@ -28,6 +28,5 @@ async fn test_save_and_check() {
 fn before_each() -> RedisTokenRepo {
     let cfg = app::test_config();
     let client = redis::open(&cfg.redis.url);
-    let repo = RedisTokenRepo::new(&client);
-    repo
+    RedisTokenRepo::new(&client)
 }

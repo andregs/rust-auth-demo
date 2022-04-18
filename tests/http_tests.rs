@@ -38,7 +38,7 @@ async fn it_should_execute_e2e_happy_path() {
     let location = res.headers().get_one("Location").expect("location header was expected");
     assert!(location.starts_with("/profile/"));
     
-    let new_id = location.split("/").last().expect("generated id was expected");
+    let new_id = location.split('/').last().expect("generated id was expected");
     let new_id = new_id.parse::<u64>().expect("numeric id was expected");
     assert!(new_id > 0);
 
@@ -53,7 +53,7 @@ async fn it_should_execute_e2e_happy_path() {
 
     // authentication
 
-    let res = client.post("/authenticate").body(token.to_string()).header(ContentType::Plain).dispatch().await;
+    let res = client.post("/authenticate").body(token).header(ContentType::Plain).dispatch().await;
     assert_eq!(res.status(), Status::Ok);
 
     let actual = res.into_json::<AuthOk>().await.expect("auth response was expected");

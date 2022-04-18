@@ -67,7 +67,7 @@ mod check_credentials {
         let credentials = new_random_credentials();
         
         let is_valid = repo.check_credentials_tx(&mut tx, &credentials).await.unwrap();
-        assert!(is_valid == false);
+        assert!(!is_valid);
     }
 
     #[async_test]
@@ -78,7 +78,7 @@ mod check_credentials {
         credentials.password = String::from("wrong password");
         
         let is_valid = repo.check_credentials_tx(&mut tx, &credentials).await.unwrap();
-        assert!(is_valid == false);
+        assert!(!is_valid);
     }
 }
 

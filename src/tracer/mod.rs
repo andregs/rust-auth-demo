@@ -16,6 +16,7 @@ pub fn stage() -> AdHoc {
     })
 }
 
+#[derive(Default)]
 pub struct Tracer {
     request_id: Option<String>,
 }

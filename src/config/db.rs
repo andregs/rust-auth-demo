@@ -11,7 +11,7 @@ pub async fn stage() -> AdHoc {
     })
 }
 
-pub async fn connect(database_url: &String) -> Pool<Postgres> {
+pub async fn connect(database_url: &str) -> Pool<Postgres> {
     PgPoolOptions::new()
         .max_connections(5)
         .connect(database_url)

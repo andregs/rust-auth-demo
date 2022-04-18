@@ -61,10 +61,10 @@ impl HttpError {
 #[async_trait]
 impl<'r> Responder<'r, 'static> for HttpError {
     fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
-        let log = req.local_cache(|| Tracer::new());
+        let log = req.local_cache(Tracer::new);
         log.error(&self.debug_message);
         let payload = JsonPayload {
-            id: &log.request_id(),
+            id: log.request_id(),
             msg: &self.display_message,
         };
         let custom = Custom(self.status, Json(payload));
@@ -79,7 +79,7 @@ struct JsonPayload<'r> {
 }
 
 #[catch(default)]
-pub fn default_catcher<'r>(status: Status, _: &'r Request<'_>) -> HttpError {
+pub fn default_catcher(status: Status, _: &Request<'_>) -> HttpError {
     let reason = status.reason().unwrap_or("Unknown error.");
     let reason = anyhow!(reason);
     HttpError::new(status, reason)
