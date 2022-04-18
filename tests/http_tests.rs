@@ -5,7 +5,7 @@ use rocket::http::{Status, ContentType};
 use rocket::local::asynchronous::Client;
 use uuid::{Uuid, Variant::RFC4122};
 
-use rust_auth_demo::{config, auth::model::*};
+use rust_auth_demo::{config, model::*};
 
 lazy_static! {
     static ref CLIENT: DoubleCheckedCell<Client> = DoubleCheckedCell::new();

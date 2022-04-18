@@ -1,5 +1,4 @@
-use rocket::response::status::Custom;
-use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::serde::{Deserialize, Serialize};
 
 pub type Token = String;
 
@@ -19,5 +18,5 @@ pub use credentials::*;
 mod error;
 pub use error::*;
 
-pub type HttpResult<T> = core::result::Result<T, Custom<Json<HttpError>>>;
 pub type Result<T> = core::result::Result<T, Error>;
+pub type HttpResult<T> = core::result::Result<T, HttpError>;

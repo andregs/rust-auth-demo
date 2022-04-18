@@ -1,5 +1,5 @@
 use redis::Client;
-use rocket::{catchers, post, routes, State};
+use rocket::{post, routes, State};
 use rocket::fairing::AdHoc;
 use rocket::response::status::Created;
 use rocket::serde::json::Json;
@@ -8,16 +8,14 @@ use super::*;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("Auth Controller", |rocket| async {
-        rocket
-            .mount("/", routes![register, login, authenticate])
-            .register("/", catchers![default_catcher])
+        rocket.mount("/", routes![register, login, authenticate])
     })
 }
 
 #[post("/register", format = "json", data = "<body>")]
-async fn register(body: Credentials, db: &State<Connection>, redis: &State<Client>) -> HttpResult<Created<&'static str>> {
+async fn register(body: HttpResult<Credentials>, db: &State<Connection>, redis: &State<Client>) -> HttpResult<Created<&'static str>> {
     let service = AuthService::new(db, redis);
-    let new_id: i64 = service.register(body).await?;
+    let new_id: i64 = service.register(body?).await?;
     
     // TODO create a /profile/<username> route that requires authentication
     let location = format!("/profile/{}", new_id); // TODO use rocket::uri!
@@ -27,9 +25,9 @@ async fn register(body: Credentials, db: &State<Connection>, redis: &State<Clien
 }
 
 #[post("/login", format = "json", data = "<body>")]
-async fn login(body: Credentials, db: &State<Connection>, redis: &State<Client>) -> HttpResult<Json<LoginOk>> {
+async fn login(body: HttpResult<Credentials>, db: &State<Connection>, redis: &State<Client>) -> HttpResult<Json<LoginOk>> {
     let service = AuthService::new(db, redis);
-    let token = service.login(body).await?;
+    let token = service.login(body?).await?;
     let body = Json(LoginOk{ token });
     Ok(body)
 }

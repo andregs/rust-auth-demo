@@ -8,7 +8,8 @@ This is a sample Rust microservice. It demonstrates how to create:
  - deploying to Kubernetes
  - different profiles (default, local, test etc.)
  - externalized configuration
- - error handling with [thiserror](https://github.com/dtolnay/thiserror/) and anyhow
+ - rest input validation
+ - centralized error handling with [thiserror](https://github.com/dtolnay/thiserror/) and anyhow
  - unit tests with [mocks](https://github.com/asomers/mockall/)
  - testing connected to a test db
  - http testing

@@ -1,7 +1,10 @@
 use anyhow::anyhow;
-use rocket::{catch, Request, response::status::Custom, serde::json::Json, http::Status};
+use rocket::{catch, Request, http::Status};
+use rocket::response::{status::Custom, Responder};
+use rocket::serde::json::{self, Json};
 use uuid::Uuid;
 use std::borrow::Cow;
+use std::fmt::{Debug, Display};
 
 use super::*;
 
@@ -19,6 +22,9 @@ pub enum Error {
     #[error("Token does not represent an authenticated user.")]
     BadToken,
     
+    #[error("The JSON input is invalid. Details: {0}")]
+    BadJson(String),
+
     #[error("Username must be alphanumeric and it must start with a letter.")]
     BadUsername,
     
@@ -47,47 +53,58 @@ impl From<sqlx::Error> for Error {
     }
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Responder, Debug)]
 pub struct HttpError {
-    pub id: String,
-    pub msg: String,
+    body: Custom<Json<ErrorBody>>,
 }
 
-pub fn to_json<E>(error: &E) -> Json<HttpError> // TODO impl From?
-where E: std::error::Error
-{
-    let id = Uuid::new_v4().to_string();
-    let msg = error.to_string();
-    
-    // TODO proper logging https://github.com/SergioBenitez/Rocket/issues/21
-    eprintln!("App Error: {:?}", error);
-    Json(HttpError { id, msg })
+#[derive(Serialize, Debug, Clone)]
+struct ErrorBody {
+    id: String,
+    msg: String,
 }
 
-impl From<Error> for Custom<Json<HttpError>> {
-    fn from(error: Error) -> Self {
+impl HttpError {
+    pub fn new<E>(status: Status, reason: E) -> Self
+    where E: Debug + Display
+    {
+        let id = Uuid::new_v4().to_string(); // TODO fahring for request ID (correlation)
+        let msg = reason.to_string();
+        let json = Json(ErrorBody { id, msg });
+        let body = Custom(status, json);
+        
+        // TODO proper logging https://github.com/SergioBenitez/Rocket/issues/21
+        eprintln!("App Error: {:?}, Reason: {:?}", body, reason);
+        HttpError { body }
+    }
+
+    pub fn status(&self) -> Status { self.body.0 }
+}
+
+impl From<Error> for HttpError {
+    fn from(reason: Error) -> Self {
         use Error::*;
-        let status = match error {
-            Duplicated(_) | TooBig(_) | BadUsername | BadUsernameSize(_,_) | BadPasswordSize(_) => Status::BadRequest,
+
+        let status = match reason {
+            Duplicated(_) | TooBig(_) | BadUsername | BadUsernameSize(_,_) | BadPasswordSize(_) | BadJson(_) => Status::BadRequest,
             BadCredentials | BadToken => Status::Unauthorized,
             Other(_) => Status::InternalServerError,
         };
-        let json = to_json(&error);
-        Custom(status, json)
+        
+        HttpError::new(status, reason)
+    }
+}
+
+impl From<json::Error<'_>> for HttpError {
+    fn from(source: json::Error) -> Self {
+        let message = source.to_string();
+        Error::BadJson(message).into()
     }
 }
 
 #[catch(default)]
-pub fn default_catcher<'r>(status: Status, req: &'r Request<'_>) -> Custom<Json<HttpError>> {
+pub fn default_catcher<'r>(status: Status, _: &'r Request<'_>) -> HttpError {
     let reason = status.reason().unwrap_or("Unknown error.");
-    let default = anyhow!(reason);
-    let id = Uuid::new_v4().to_string();
-    let json = Json(HttpError { id: id.clone(), msg: default.to_string() });
-    let cached = req.local_cache(|| json).to_owned();
-
-    if cached.0.id == id { // no cached error was found
-        // TODO proper logging https://github.com/SergioBenitez/Rocket/issues/21
-        eprintln!("Default Catcher: {:?}", default);
-    }
-    Custom(status, cached)
+    let reason = anyhow!(reason);
+    HttpError::new(status, reason)
 }

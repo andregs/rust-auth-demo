@@ -1,10 +1,10 @@
 use rocket::fairing::AdHoc;
 use rocket::figment::providers::{Env, Format, Toml};
 use rocket::figment::{Figment, Profile};
-use rocket::{Build, Rocket};
+use rocket::{Build, Rocket, catchers};
 
-use super::*;
-use crate::auth;
+use crate::*;
+use crate::config::*;
 
 pub async fn build_rocket() -> Rocket<Build> {
     let provider = config_provider();
@@ -12,7 +12,8 @@ pub async fn build_rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<AppConfig>())
         .attach(db::stage().await)
         .attach(redis::stage().await)
-        .attach(auth::controller::stage())
+        .attach(controller::stage())
+        .register("/", catchers![default_catcher])
 }
 
 /// see https://rocket.rs/v0.5-rc/guide/configuration/#custom-providers
