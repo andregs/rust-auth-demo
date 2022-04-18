@@ -12,6 +12,7 @@ pub async fn build_rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<AppConfig>())
         .attach(db::stage().await)
         .attach(redis::stage().await)
+        .attach(tracer::stage())
         .attach(controller::stage())
         .register("/", catchers![default_catcher])
 }

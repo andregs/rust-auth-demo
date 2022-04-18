@@ -5,6 +5,7 @@ use rocket::response::status::Created;
 use rocket::serde::json::Json;
 
 use super::*;
+use super::Tracer;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("Auth Controller", |rocket| async {
@@ -13,7 +14,9 @@ pub fn stage() -> AdHoc {
 }
 
 #[post("/register", format = "json", data = "<body>")]
-async fn register(body: HttpResult<Credentials>, db: &State<Connection>, redis: &State<Client>) -> HttpResult<Created<&'static str>> {
+async fn register(body: HttpResult<Credentials>, db: &State<Connection>, redis: &State<Client>, log: &Tracer) -> HttpResult<Created<&'static str>> {
+    log.info("Testing tracer.");
+    
     let service = AuthService::new(db, redis);
     let new_id: i64 = service.register(body?).await?;
     

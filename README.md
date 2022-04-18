@@ -1,20 +1,8 @@
 # Auth in Rust
 
-This is a sample Rust microservice. It demonstrates how to create:
- - a [Rocket](https://rocket.rs/) web app
- - writing data to PostgreSQL & Redis
- - DB migrations
- - type safe SQL queries
- - deploying to Kubernetes
- - different profiles (default, local, test etc.)
- - externalized configuration
- - rest input validation
- - centralized error handling with [thiserror](https://github.com/dtolnay/thiserror/) and anyhow
- - unit tests with [mocks](https://github.com/asomers/mockall/)
- - testing connected to a test db
- - http testing
+This is a sample Rust microservice that can be deployed on Kubernetes.
 
-This is a pet project for learning purposes based on [this tutorial](https://betterprogramming.pub/structuring-rust-project-for-testability-18207b5d0243).
+This is a pet project for learning purposes that started from [this tutorial](https://betterprogramming.pub/structuring-rust-project-for-testability-18207b5d0243).
 
 ## tl;dr
 
@@ -25,11 +13,28 @@ minikube start --mount --mount-string=$PWD:/mnt/host --cpus=4
 skaffold dev --trigger=manual --iterative-status-check
 ```
 
-[Skaffold](https://skaffold.dev/docs/install/) will build the app, deploy it in the cluster, watch for code changes and cleanup on quit.
+## What's inside
+
+This project demonstrates how to create:
+ - a [Rocket](https://rocket.rs/) web app
+ - writing data to PostgreSQL & Redis
+ - execute DB migrations on deploy
+ - type safe SQL queries
+ - deploying to Kubernetes
+ - different profiles (default, local, test etc.)
+ - externalized configuration
+ - rest input validation
+ - centralized error handling with [thiserror](https://github.com/dtolnay/thiserror/) and anyhow
+ - tracer that logs messages with a http request ID for easy correlation
+ - unit tests with [mocks](https://github.com/asomers/mockall/)
+ - testing connected to a test db
+ - http testing
 
 https://user-images.githubusercontent.com/712092/163493261-8ed6b178-9eed-4417-a6cd-42e356b91d3e.mp4
 
-## More details
+## Mode details / How I did it
+
+[Skaffold](https://skaffold.dev/docs/install/) will build the app, deploy it in the cluster, watch for code changes and cleanup on quit.
 
 Use `kubectl` to generate k8s yaml files (and customize them according your needs).
 

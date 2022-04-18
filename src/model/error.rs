@@ -1,10 +1,11 @@
 use anyhow::anyhow;
-use rocket::{catch, Request, http::Status};
-use rocket::response::{status::Custom, Responder};
+use rocket::{async_trait, catch, Request, http::Status, outcome::Outcome};
+use rocket::response::{self, status::Custom, Responder, Response};
 use rocket::serde::json::{self, Json};
-use uuid::Uuid;
 use std::borrow::Cow;
 use std::fmt::{Debug, Display};
+
+use crate::tracer::Tracer;
 
 use super::*;
 
@@ -38,47 +39,50 @@ pub enum Error {
     Other(#[from] anyhow::Error),
 }
 
-impl From<sqlx::Error> for Error {
-    fn from(source: sqlx::Error) -> Self {
-        if let sqlx::Error::Database(ref err) = source {
-            // https://www.postgresql.org/docs/current/errcodes-appendix.html
-            if err.code() == Some(Cow::from("23505")) {
-                return Error::Duplicated(source);
-            } else if err.code() == Some(Cow::from("22001")) {
-                return Error::TooBig(source);
-            }
-        }
-
-        Error::Other(anyhow!(source))
-    }
-}
-
-#[derive(Responder, Debug)]
+#[derive(Debug)]
 pub struct HttpError {
-    body: Custom<Json<ErrorBody>>,
-}
-
-#[derive(Serialize, Debug, Clone)]
-struct ErrorBody {
-    id: String,
-    msg: String,
+    status: Status,
+    display_message: String,
+    debug_message: String,
 }
 
 impl HttpError {
     pub fn new<E>(status: Status, reason: E) -> Self
     where E: Debug + Display
     {
-        let id = Uuid::new_v4().to_string(); // TODO fahring for request ID (correlation)
-        let msg = reason.to_string();
-        let json = Json(ErrorBody { id, msg });
-        let body = Custom(status, json);
-        
-        // TODO proper logging https://github.com/SergioBenitez/Rocket/issues/21
-        eprintln!("App Error: {:?}, Reason: {:?}", body, reason);
-        HttpError { body }
+        HttpError {
+            status,
+            display_message: format!("{}", reason),
+            debug_message: format!("{:?}", reason),
+        }
     }
+}
 
-    pub fn status(&self) -> Status { self.body.0 }
+#[async_trait]
+impl<'r> Responder<'r, 'static> for HttpError {
+    fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+        let log = req.local_cache(|| Tracer::new());
+        log.error(&self.debug_message);
+        let payload = JsonPayload {
+            id: &log.request_id(),
+            msg: &self.display_message,
+        };
+        let custom = Custom(self.status, Json(payload));
+        Response::build_from(custom.respond_to(req)?).ok()
+    }
+}
+
+#[derive(Serialize, Debug)]
+struct JsonPayload<'r> {
+    id: &'r str,
+    msg: &'r str,
+}
+
+#[catch(default)]
+pub fn default_catcher<'r>(status: Status, _: &'r Request<'_>) -> HttpError {
+    let reason = status.reason().unwrap_or("Unknown error.");
+    let reason = anyhow!(reason);
+    HttpError::new(status, reason)
 }
 
 impl From<Error> for HttpError {
@@ -95,6 +99,21 @@ impl From<Error> for HttpError {
     }
 }
 
+impl From<sqlx::Error> for Error {
+    fn from(source: sqlx::Error) -> Self {
+        if let sqlx::Error::Database(ref err) = source {
+            // https://www.postgresql.org/docs/current/errcodes-appendix.html
+            if err.code() == Some(Cow::from("23505")) {
+                return Error::Duplicated(source);
+            } else if err.code() == Some(Cow::from("22001")) {
+                return Error::TooBig(source);
+            }
+        }
+
+        Error::Other(anyhow!(source))
+    }
+}
+
 impl From<json::Error<'_>> for HttpError {
     fn from(source: json::Error) -> Self {
         let message = source.to_string();
@@ -102,9 +121,10 @@ impl From<json::Error<'_>> for HttpError {
     }
 }
 
-#[catch(default)]
-pub fn default_catcher<'r>(status: Status, _: &'r Request<'_>) -> HttpError {
-    let reason = status.reason().unwrap_or("Unknown error.");
-    let reason = anyhow!(reason);
-    HttpError::new(status, reason)
+impl<'r, S, F> From<Error> for Outcome<S, (Status, HttpError), F> {
+    fn from(error: Error) -> Self {
+        let error: HttpError = error.into();
+        let status = error.status;
+        Outcome::Failure((status, error))
+    }
 }

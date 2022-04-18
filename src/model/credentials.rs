@@ -1,7 +1,6 @@
 use lazy_regex::regex_is_match;
-use rocket::{async_trait, data, Request};
+use rocket::{async_trait, data, Request, outcome::Outcome};
 use rocket::data::{Data, FromData};
-use rocket::outcome::Outcome::*;
 use rocket::serde::{Deserialize, Serialize, json::Json};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -25,29 +24,24 @@ impl<'r> FromData<'r> for Credentials {
             .map_failure(|(status, error)| (status, error.into()));
 
         // TODO cover these scenarios with tests
-        if let Success(ref credentials) = outcome {
+        if let Outcome::Success(ref credentials) = outcome {
             let size = credentials.username.graphemes(true).count();
             let (min, max) = (1, 42);
             if size < min || size > max {
-                return to_failure(BadUsernameSize(min, max));
+                return BadUsernameSize(min, max).into();
             }
 
             let size = credentials.password.graphemes(true).count();
             let min = 8;
             if size < min {
-                return to_failure(BadPasswordSize(min));
+                return BadPasswordSize(min).into();
             }
 
             if ! regex_is_match!("^([A-Za-z]+)([0-9A-Za-z]*)$", &credentials.username) {
-                return to_failure(BadUsername);
+                return BadUsername.into();
             }
         }
 
         outcome
     }
-}
-
-fn to_failure<'r>(error: Error) -> data::Outcome<'r, Credentials> {
-    let error: HttpError = error.into();
-    Failure((error.status(), error))
 }
