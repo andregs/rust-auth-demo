@@ -16,23 +16,23 @@ skaffold dev --trigger=manual --iterative-status-check
 ## What's inside
 
 This project demonstrates how to create:
- - a [Rocket](https://rocket.rs/) web app
- - writing data to PostgreSQL & Redis
- - execute DB migrations on deploy
- - type safe SQL queries
- - deploying to Kubernetes
- - different profiles (default, local, test etc.)
- - externalized configuration
- - rest input validation
- - centralized error handling with [thiserror](https://github.com/dtolnay/thiserror/) and anyhow
- - tracer that logs messages with a http request ID for easy correlation
- - unit tests with [mocks](https://github.com/asomers/mockall/)
- - testing connected to a test db
- - http testing
+ - a [Rocket](./src/controller/mod.rs) web app
+ - writing data to [PostgreSQL](./src/credential_repo/mod.rs) & [Redis](./src/token_repo/mod.rs)
+ - execute DB [migrations](./migrations/) on [deploy](./ops/k8s/migrations/migrations-job.yaml)
+ - type safe [SQL queries](./src/credential_repo/mod.rs)
+ - deploying to [Kubernetes](./skaffold.yaml) with Cloud Native Buildpacks
+ - different [profiles](./App.toml) (default, local, test etc.)
+ - externalized [configuration](./src/config/app.rs)
+ - rest input [validation](./src/model/credentials.rs)
+ - centralized [error handling](./src/model/error.rs) with `thiserror` and `anyhow`
+ - [tracer](./src/tracer/mod.rs) that logs messages with a http request ID for easy correlation
+ - [unit tests](./src/service/tests.rs) with mocks
+ - testing connected to a [test db](./src/credential_repo/tests.rs)
+ - [http testing](./tests/http_tests.rs)
 
 https://user-images.githubusercontent.com/712092/163493261-8ed6b178-9eed-4417-a6cd-42e356b91d3e.mp4
 
-## Mode details / How I did it
+## More details / How I did it
 
 [Skaffold](https://skaffold.dev/docs/install/) will build the app, deploy it in the cluster, watch for code changes and cleanup on quit.
 
