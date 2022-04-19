@@ -1,7 +1,7 @@
 use lazy_regex::regex_is_match;
-use rocket::{async_trait, data, Request, outcome::Outcome};
 use rocket::data::{Data, FromData};
-use rocket::serde::{Deserialize, Serialize, json::Json};
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::{async_trait, data, outcome::Outcome, Request};
 use unicode_segmentation::UnicodeSegmentation;
 
 use super::*;
@@ -19,7 +19,8 @@ impl<'r> FromData<'r> for Credentials {
     async fn from_data(req: &'r Request<'_>, data: Data<'r>) -> data::Outcome<'r, Self> {
         use super::Error::*;
 
-        let outcome = Json::<Credentials>::from_data(req, data).await
+        let outcome = Json::<Credentials>::from_data(req, data)
+            .await
             .map(|json| json.into_inner())
             .map_failure(|(status, error)| (status, error.into()));
 
@@ -37,7 +38,7 @@ impl<'r> FromData<'r> for Credentials {
                 return BadPasswordSize(min).into();
             }
 
-            if ! regex_is_match!("^([A-Za-z]+)([0-9A-Za-z]*)$", &credentials.username) {
+            if !regex_is_match!("^([A-Za-z]+)([0-9A-Za-z]*)$", &credentials.username) {
                 return BadUsername.into();
             }
         }

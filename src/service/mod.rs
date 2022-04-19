@@ -1,5 +1,5 @@
-use rocket::async_trait;
 use redis::Client;
+use rocket::async_trait;
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 

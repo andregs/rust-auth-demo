@@ -10,7 +10,7 @@ pub type Transaction = sqlx::Transaction<'static, Postgres>;
 #[async_trait]
 pub trait CredentialRepoApi {
     async fn insert_credentials_tx(&self, tx: &mut Transaction, credentials: &Credentials) -> Result<i64>;
-    
+
     // I could make a generic version of check_credentials to avoid this duplication,
     // but I don't know how to make it work with automock.
     async fn check_credentials_db(&self, db: &Connection, credentials: &Credentials) -> Result<bool>;
@@ -37,7 +37,7 @@ impl PostgresCredentialRepo {
         .map(|row| row.id)
         .map_err(|err| err.into())
     }
-    
+
     async fn check_credentials<'ex, EX>(&self, executor: EX, credentials: &Credentials) -> Result<bool>
     where
         EX: 'ex + Executor<'ex, Database = Postgres>,

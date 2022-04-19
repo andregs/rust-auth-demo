@@ -1,10 +1,10 @@
 use rocket::fairing::AdHoc;
 use rocket::figment::providers::{Env, Format, Toml};
 use rocket::figment::{Figment, Profile};
-use rocket::{Build, Rocket, catchers};
+use rocket::{catchers, Build, Rocket};
 
-use crate::*;
 use crate::config::*;
+use crate::*;
 
 pub async fn build_rocket() -> Rocket<Build> {
     let provider = config_provider();
@@ -27,8 +27,5 @@ fn config_provider() -> Figment {
 
 #[cfg(test)]
 pub fn test_config() -> AppConfig {
-    config_provider()
-        .select(Profile::new("test"))
-        .extract()
-        .unwrap()
+    config_provider().select(Profile::new("test")).extract().unwrap()
 }

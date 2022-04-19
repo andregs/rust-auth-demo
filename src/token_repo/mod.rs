@@ -1,6 +1,6 @@
 use anyhow::Context;
-use rocket::async_trait;
 use redis::{AsyncCommands, Client};
+use rocket::async_trait;
 
 use super::*;
 
@@ -17,9 +17,7 @@ pub struct RedisTokenRepo {
 
 impl RedisTokenRepo {
     pub fn new(client: &Client) -> Self {
-        Self {
-            client: client.clone(),
-        }
+        Self { client: client.clone() }
     }
 }
 
@@ -27,7 +25,10 @@ impl RedisTokenRepo {
 impl TokenRepoApi for RedisTokenRepo {
     async fn save_token(&self, token: &Token, username: &str) -> Result<()> {
         // redis-rs currently doesn't have connection pooling
-        let mut conn = self.client.get_async_connection().await
+        let mut conn = self
+            .client
+            .get_async_connection()
+            .await
             .context("Unable to connect to Redis")?;
         let key = get_key(token);
         let value = username;
@@ -36,7 +37,10 @@ impl TokenRepoApi for RedisTokenRepo {
     }
 
     async fn get_username(&self, token: &Token) -> Result<String> {
-        let mut conn = self.client.get_async_connection().await
+        let mut conn = self
+            .client
+            .get_async_connection()
+            .await
             .context("Unable to connect to Redis")?;
         let key = get_key(token);
         let value: Option<String> = conn.get(key).await.context("Unable to fetch the username")?;

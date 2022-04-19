@@ -8,9 +8,9 @@ mod credential_repo;
 mod token_repo;
 mod tracer;
 
+use credential_repo::*;
 use model::*;
 use service::*;
-use credential_repo::*;
 use token_repo::*;
 use tracer::*;
 

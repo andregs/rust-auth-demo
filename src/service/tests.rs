@@ -5,8 +5,8 @@ use super::*;
 use crate::config::*;
 
 mod register {
-    use anyhow::anyhow;
     use super::*;
+    use anyhow::anyhow;
 
     #[async_test]
     async fn it_should_return_new_id_when_registration_is_ok() {
@@ -33,7 +33,7 @@ mod register {
         let (username, password) = ("a".into(), "b".into());
         let credentials = Credentials { username, password };
         let actual = svc.register(credentials).await;
-        
+
         match actual {
             Err(Error::Other(_)) => (/* love my job */),
             Err(e) => panic!("unexpected error: {:?}", e),
@@ -53,10 +53,7 @@ mod login {
             .once()
             .return_once(|_, _| Ok(true));
 
-        svc.token_repo
-            .expect_save_token()
-            .once()
-            .return_once(|_, _| Ok(()));
+        svc.token_repo.expect_save_token().once().return_once(|_, _| Ok(()));
 
         let (username, password) = ("a".into(), "b".into());
         let credentials = Credentials { username, password };
@@ -78,9 +75,9 @@ mod login {
 
         let (username, password) = ("a".into(), "b".into());
         let credentials = Credentials { username, password };
-        
+
         let actual = svc.login(credentials).await;
-        
+
         match actual {
             Err(Error::BadCredentials) => (/* life is good */),
             Err(e) => panic!("unexpected error: {:?}", e),

@@ -1,12 +1,12 @@
 use anyhow::anyhow;
+use rocket::request::{FromRequest, Outcome, Request};
 use rocket::{async_trait, fairing::AdHoc};
-use rocket::request::{Request, FromRequest, Outcome};
 use uuid::Uuid;
 
 use super::*;
 
 pub fn stage() -> AdHoc {
-    AdHoc::on_request("Request Tracer", |req, _| {        
+    AdHoc::on_request("Request Tracer", |req, _| {
         Box::pin(async move {
             let uuid = Uuid::new_v4().to_string();
             let mut tracer = Tracer::new();

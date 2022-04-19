@@ -1,7 +1,7 @@
 use anyhow::anyhow;
-use rocket::{async_trait, catch, Request, http::Status, outcome::Outcome};
 use rocket::response::{self, status::Custom, Responder, Response};
 use rocket::serde::json::{self, Json};
+use rocket::{async_trait, catch, http::Status, outcome::Outcome, Request};
 use std::borrow::Cow;
 use std::fmt::{Debug, Display};
 
@@ -19,19 +19,19 @@ pub enum Error {
 
     #[error("Username and/or password mismatch.")]
     BadCredentials,
-    
+
     #[error("Token does not represent an authenticated user.")]
     BadToken,
-    
+
     #[error("The JSON input is invalid. Details: {0}")]
     BadJson(String),
 
     #[error("Username must be alphanumeric and it must start with a letter.")]
     BadUsername,
-    
+
     #[error("Username must be between {0} and {1} characters.")]
     BadUsernameSize(usize, usize),
-    
+
     #[error("Password must contain at least {0} characters.")]
     BadPasswordSize(usize),
 
@@ -48,7 +48,8 @@ pub struct HttpError {
 
 impl HttpError {
     pub fn new<E>(status: Status, reason: E) -> Self
-    where E: Debug + Display
+    where
+        E: Debug + Display,
     {
         HttpError {
             status,
@@ -90,11 +91,13 @@ impl From<Error> for HttpError {
         use Error::*;
 
         let status = match reason {
-            Duplicated(_) | TooBig(_) | BadUsername | BadUsernameSize(_,_) | BadPasswordSize(_) | BadJson(_) => Status::BadRequest,
+            Duplicated(_) | TooBig(_) | BadUsername | BadUsernameSize(_, _) | BadPasswordSize(_) | BadJson(_) => {
+                Status::BadRequest
+            }
             BadCredentials | BadToken => Status::Unauthorized,
             Other(_) => Status::InternalServerError,
         };
-        
+
         HttpError::new(status, reason)
     }
 }

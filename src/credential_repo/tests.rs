@@ -56,7 +56,7 @@ mod check_credentials {
         let (mut tx, repo) = before_each().await;
         let credentials = &new_random_credentials();
         repo.insert_credentials(&mut tx, credentials).await.unwrap();
-        
+
         let is_valid = repo.check_credentials_tx(&mut tx, credentials).await.unwrap();
         assert!(is_valid);
     }
@@ -65,7 +65,7 @@ mod check_credentials {
     async fn it_should_not_find_when_username_is_wrong() {
         let (mut tx, repo) = before_each().await;
         let credentials = new_random_credentials();
-        
+
         let is_valid = repo.check_credentials_tx(&mut tx, &credentials).await.unwrap();
         assert!(!is_valid);
     }
@@ -76,7 +76,7 @@ mod check_credentials {
         let mut credentials = new_random_credentials();
         repo.insert_credentials(&mut tx, &credentials).await.unwrap();
         credentials.password = String::from("wrong password");
-        
+
         let is_valid = repo.check_credentials_tx(&mut tx, &credentials).await.unwrap();
         assert!(!is_valid);
     }
@@ -99,6 +99,6 @@ async fn connect() -> Pool<Postgres> {
 fn new_random_credentials() -> Credentials {
     let uuid = Uuid::new_v4().to_string();
     let username = format!("test-{}", uuid);
-    let password = uuid;    
-    Credentials{ username, password }
+    let password = uuid;
+    Credentials { username, password }
 }
